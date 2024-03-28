@@ -1,7 +1,7 @@
 # Личный проект «Readme»
 
-* Студент: [Никита Сливканич](https://up.htmlacademy.ru/nodejs-2/6/user/903451).
-* Наставник: `Неизвестно`.
+* Студент: [Nikita Slyvkanych](https://up.htmlacademy.ru/nodejs-2/6/user/903451).
+* Наставник: [Rail Sakhaviev](https://htmlacademy.ru/profile/id1331891).
 
 ---
 
