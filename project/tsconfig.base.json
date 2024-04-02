@@ -15,8 +15,10 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@project/core": ["libs/shared/core/src/index.ts"],
-      "@project/helpers": ["libs/shared/helpers/src/index.ts"]
+      "@project/authentication": ["libs/users/authentication/src/index.ts"],
+      "@project/blog-user": ["libs/users/blog-user/src/index.ts"],
+      "@project/shared/core": ["libs/shared/core/src/index.ts"],
+      "@project/shared/helpers": ["libs/shared/helpers/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]
