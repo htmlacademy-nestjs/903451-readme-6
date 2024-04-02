@@ -13,6 +13,7 @@ export abstract class BaseMemoryRepository<
 
   public async findById(id: T['id']): Promise<T> {
     const foundEntity = this.entities.get(id) || null;
+
     if (!foundEntity) {
       return null;
     }
