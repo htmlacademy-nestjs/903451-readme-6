@@ -12,6 +12,7 @@ import { BlogUserEntity, BlogUserRepository } from '@project/blog-user';
 
 import { CreateUserDto } from '../dto/create-user.dto';
 import { LoginUserDto } from '../dto/login-user.dto';
+import { ChangeUserPasswordDto } from '../dto/change-user-password.dto';
 
 const AUTH_USER_EXISTS = 'User with this email exists';
 const AUTH_USER_IS_NOT_REGISTERED = 'User with this email is not registered';
@@ -63,6 +64,27 @@ export class AuthenticationService {
     }
 
     return existUser;
+  }
+  public async changePassword(
+    dto: ChangeUserPasswordDto
+  ): Promise<BlogUserEntity> {
+    const { currentPassword, newPassword } = dto;
+
+    const existUser = await this.blogUserRepository.findByPassword(
+      currentPassword
+    );
+
+    if (!existUser) {
+      throw new NotFoundException(AUTH_USER_IS_NOT_REGISTERED);
+    }
+
+    const userWithNewPassword = await new BlogUserEntity(existUser).setPassword(
+      newPassword
+    );
+
+    this.blogUserRepository.save(userWithNewPassword);
+
+    return userWithNewPassword;
   }
 
   public async getUser(id: string): Promise<BlogUserEntity | null> {

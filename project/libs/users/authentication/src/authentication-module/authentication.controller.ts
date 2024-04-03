@@ -3,6 +3,7 @@ import { AuthUser } from '@project/shared/core';
 import { AuthenticationService } from './authentication.service';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { LoginUserDto } from '../dto/login-user.dto';
+import { ChangeUserPasswordDto } from '../dto/change-user-password.dto';
 
 @Controller('auth')
 export class AuthenticationController {
@@ -17,6 +18,15 @@ export class AuthenticationController {
   @Post('login')
   public async login(@Body() dto: LoginUserDto): Promise<AuthUser> {
     const user = await this.authService.verifyUser(dto);
+
+    return user.toPOJO();
+  }
+
+  @Post('change-password')
+  public async changePassword(
+    @Body() dto: ChangeUserPasswordDto
+  ): Promise<AuthUser> {
+    const user = await this.authService.changePassword(dto);
 
     return user.toPOJO();
   }
