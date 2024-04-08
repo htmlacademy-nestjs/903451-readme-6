@@ -17,21 +17,4 @@ export class BlogUserRepository extends BaseMemoryRepository<BlogUserEntity> {
       ? Promise.resolve(this.entityFactory.create(user))
       : Promise.resolve(null);
   }
-
-  public async findByPassword(
-    password: string
-  ): Promise<BlogUserEntity | null> {
-    const entities = Array.from(this.entities.values());
-    const users = entities.map((entity) => new BlogUserEntity(entity));
-
-    for (const user of users) {
-      const isPassWordMatched = await user.comparePassword(password);
-
-      if (isPassWordMatched) {
-        return Promise.resolve(user);
-      }
-    }
-
-    return Promise.resolve(null);
-  }
 }

@@ -22,19 +22,20 @@ export class AuthenticationController {
     return user.toPOJO();
   }
 
-  @Post('change-password')
+  @Post(':id/change-password')
   public async changePassword(
+    @Param('id') id: string,
     @Body() dto: ChangeUserPasswordDto
   ): Promise<AuthUser> {
-    const user = await this.authService.changePassword(dto);
+    const user = await this.authService.changePassword(id, dto);
 
     return user.toPOJO();
   }
 
   @Get(':id')
-  public async getUser(@Param('id') id: string): Promise<AuthUser | null> {
+  public async getUser(@Param('id') id: string): Promise<AuthUser> {
     const user = await this.authService.getUser(id);
 
-    return user?.toPOJO() ?? null;
+    return user.toPOJO();
   }
 }

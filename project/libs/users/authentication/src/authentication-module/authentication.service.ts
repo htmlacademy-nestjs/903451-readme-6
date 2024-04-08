@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import dayjs from 'dayjs';
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
@@ -66,16 +67,19 @@ export class AuthenticationService {
     return existUser;
   }
   public async changePassword(
+    id: string,
     dto: ChangeUserPasswordDto
   ): Promise<BlogUserEntity> {
     const { currentPassword, newPassword } = dto;
 
-    const existUser = await this.blogUserRepository.findByPassword(
-      currentPassword
-    );
+    const existUser = await this.blogUserRepository.findById(id);
 
     if (!existUser) {
       throw new NotFoundException(AUTH_USER_IS_NOT_REGISTERED);
+    }
+
+    if (!existUser.comparePassword(currentPassword)) {
+      throw new BadRequestException(AUTH_USER_PASSWORD_IS_NOT_CORRECT);
     }
 
     const userWithNewPassword = await new BlogUserEntity(existUser).setPassword(
@@ -87,7 +91,13 @@ export class AuthenticationService {
     return userWithNewPassword;
   }
 
-  public async getUser(id: string): Promise<BlogUserEntity | null> {
-    return this.blogUserRepository.findById(id);
+  public async getUser(id: string): Promise<BlogUserEntity> {
+    const user = await this.blogUserRepository.findById(id);
+
+    if (!user) {
+      throw new NotFoundException(AUTH_USER_IS_NOT_REGISTERED);
+    }
+
+    return user;
   }
 }
