@@ -7,16 +7,22 @@ import { PostDto } from '../dto/post.dto';
 import { BlogPostEntity } from './blog-post.entity';
 
 const POST_NOT_FOUND_EXEPTION = 'Requested post is not found';
+const NO_POSTS_EXCEPTION = 'No posts found';
 
 @Injectable()
 export class BlogPostService {
   constructor(private readonly blogPostRepository: BlogPostRepository) {}
 
-  public async getAllPosts(): Promise<BlogPostEntity[] | null> {
-    return this.blogPostRepository.getAllValues();
+  public async getAllPosts(): Promise<BlogPost[]> {
+    const blogPosts = await this.blogPostRepository.getAllValues();
+    if (!blogPosts) {
+      throw new NotFoundException(NO_POSTS_EXCEPTION);
+    }
+
+    return blogPosts.map((blogPost) => blogPost.toPOJO());
   }
 
-  public async createPost(dto: PostDto): Promise<BlogPostEntity> {
+  public async createPost(dto: PostDto): Promise<BlogPost> {
     const post: BlogPost = {
       id: randomUUID(),
       type: dto.type,
@@ -37,51 +43,90 @@ export class BlogPostService {
 
     this.blogPostRepository.save(newPost);
 
-    return newPost;
+    return newPost.toPOJO();
   }
 
-  public async getPostById(id: string): Promise<BlogPostEntity> {
-    const existPost = this.blogPostRepository.findById(id);
+  public async getPostById(id: string): Promise<BlogPost> {
+    const existPost = await this.blogPostRepository.findById(id);
 
     if (!existPost) {
       throw new NotFoundException(POST_NOT_FOUND_EXEPTION);
     }
 
-    return existPost;
+    return existPost.toPOJO();
   }
 
   public async updatePostById(
     id: string,
     dto: PostDto
   ): Promise<BlogPostEntity> {
-    const existPost = this.blogPostRepository.findById(id);
+    const existPost = await this.blogPostRepository.findById(id);
 
     if (!existPost) {
       throw new NotFoundException(POST_NOT_FOUND_EXEPTION);
     }
 
-    const { type } = dto;
+    const {
+      type,
+      announce,
+      text,
+      photo,
+      status,
+      description,
+      linkUrl,
+      videoUrl,
+      author,
+      tags,
+      title,
+      quote,
+    } = dto;
 
-    // TODO:#posts: finish with updating
-    const postUpdates: BlogPost = (() => {
+    const particularPostUpdates: Partial<BlogPost> = (() => {
       switch (type) {
         case BlogPostType.Text:
-          return {};
+          return { title, announce, text };
         case BlogPostType.Video:
-          return {};
+          return { title, videoUrl };
         case BlogPostType.Link:
-          return {};
+          return { linkUrl, description };
         case BlogPostType.Photo:
-          return {};
+          return { photo };
         case BlogPostType.Quote:
-          return {};
+          return { quote, author };
       }
     })();
 
-    const updatedPost = new BlogPostEntity({ ...existPost, ...postUpdates });
+    const updatedPost: BlogPost = {
+      ...existPost.toPOJO(),
+      type,
+      status,
+      tags,
+      ...particularPostUpdates,
+    };
 
-    this.blogPostRepository.save(updatedPost);
+    const updatedBlogPost = new BlogPostEntity(updatedPost);
 
-    return updatedPost;
+    this.blogPostRepository.save(updatedBlogPost);
+
+    return updatedBlogPost;
+  }
+
+  public async deletePostById(id: string): Promise<void> {
+    const existPost = await this.blogPostRepository.findById(id);
+
+    if (!existPost) {
+      throw new NotFoundException(POST_NOT_FOUND_EXEPTION);
+    }
+
+    this.blogPostRepository.deleteById(id);
+  }
+
+  public async searchPostsByQuery(query: string): Promise<BlogPost[]> {
+    const posts = await this.blogPostRepository.getAllValues();
+    const filteredPosts = posts.filter(
+      (post) => !!post.title && post.title.includes(query)
+    );
+
+    return filteredPosts.map((post) => post.toPOJO());
   }
 }
